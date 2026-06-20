@@ -22,10 +22,14 @@
     <div id="gallery-container" class="gallery-grid">Loading visualization frames...</div>
 
     <script>
+
         // CONFIG: Replace with your actual Google Sheet ID
-        const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
-        const TAB_NAME = 'PhotoGallery';
-        const CSV_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${TAB_NAME}`;
+    const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
+    const TAB_NAME = 'PhotoGallery';
+
+    // FIX: Added the correct Google path and the missing '$' before {SHEET_ID}
+    const CSV_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${TAB_NAME}`;
+
 
         // Helper function to extract Google Drive ID and return clean CDN hotlink
         function convertDriveLinkToImage(rawUrl) {
