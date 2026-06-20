@@ -62,17 +62,29 @@ const CSV_URL = `https://google.com{SHEET_ID}/export?format=csv&sheet=${TAB_NAME
             });
         }
 
-        async function fetchGallery() {
-            try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                const photos = parseCSV(csvText);
-                renderGallery(photos);
-            } catch (error) {
-                document.getElementById('gallery-container').innerText = 'Failed to download asset streams.';
-                console.error(error);
-            }
+async function fetchGallery() {
+    try {
+        console.log("Attempting to fetch from:", CSV_URL);
+        const response = await fetch(CSV_URL);
+        
+        // Catch HTTP status errors (like 404, 403, 400)
+        if (!response.ok) {
+            throw new Error(`HTTP Error Status: ${response.status} ${response.statusText}`);
         }
+        
+        const csvText = await response.text();
+        console.log("Raw data successfully downloaded. First 50 chars:", csvText.substring(0, 50));
+        
+        const photos = parseCSV(csvText);
+        renderGallery(photos);
+    } catch (error) {
+        // This will now tell you EXACTLY what went wrong on your web page
+        document.getElementById('gallery-container').style.color = '#ff4a4a';
+        document.getElementById('gallery-container').innerText = `System Error: ${error.message}`;
+        console.error("Detailed Error Logs:", error);
+    }
+}
+
 
         function renderGallery(photos) {
             const container = document.getElementById('gallery-container');
