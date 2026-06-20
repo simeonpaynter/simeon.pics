@@ -1,0 +1,20 @@
+[
+  {
+    "id": "2026-06-20-01",
+    "image_path": "images/lake-afternoon.jpg",
+    "alt_text": "A quiet, glassy lake during a summer afternoon with soft storm clouds overhead.",
+    "caption": "A quiet afternoon by the lake. Taking in the silence before the rain starts.",
+    "date_published": "2026-06-20",
+    "location": "Boundary Waters, MN",
+    "aspect_ratio": "1:1"
+  },
+  {
+    "id": "2026-06-15-01",
+    "image_path": "images/coffee-shop-workspace.jpg",
+    "alt_text": "A porcelain mug of hot coffee sitting next to a laptop open to a code editor.",
+    "caption": "Configuring the new minimalist photography portfolio site today. Simple tools win.",
+    "date_published": "2026-06-15",
+    "location": "Local Roasters",
+    "aspect_ratio": "4:5"
+  }
+]
