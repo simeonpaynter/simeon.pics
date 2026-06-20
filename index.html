@@ -3,43 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simeon.pics | Live Hard-Coded Portfolio</title>
+    <title>Simeon.pics | Raw Link Test</title>
     <style>
         body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #f0f0f0; }
-        .status-box { background: #2a2a2a; border-left: 4px solid #00ffcc; padding: 15px; margin-bottom: 20px; font-size: 0.9rem; }
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .gallery-card { background: #222; border: 1px solid #333; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .gallery-card { background: #222; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
         .gallery-card img { width: 100%; height: 240px; object-fit: cover; display: block; background: #333; }
         .gallery-info { padding: 15px; }
-        .gallery-info h3 { margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; }
-        .gallery-info p { margin: 0 0 10px 0; color: #aaa; font-size: 0.85rem; }
-        .gallery-info small { color: #00ffcc; font-size: 0.75rem; display: block; }
     </style>
 </head>
 <body>
 
     <h1>📷 Simeon.pics Portfolio</h1>
-    
-    <!-- System Diagnostics Output Box -->
-    <div id="system-status" class="status-box">Log: Initializing rendering pipelines...</div>
-
-    <!-- UI Target Container -->
     <div id="gallery-container" class="gallery-grid"></div>
 
     <script>
-        // ==========================================
-        // 1. HARD-CODED LOCAL DATA MATRIX
-        // ==========================================
         const STATIC_PHOTOS = [
             {
-                PhotoID: "1",
                 Title: "a mom and her fawn",
                 Caption: "sunrise with deer",
                 ImageURL: "https://drive.google.com/file/d/1oYXTGryFK6UG5JhkHUfT83d9yPzS4dW7/view?usp=sharing",
                 Date: "2026-05-15"
             },
             {
-                PhotoID: "2",
                 Title: "fun times",
                 Caption: "friday night in the cities",
                 ImageURL: "https://drive.google.com/file/d/1ClQvQpnqFn9IjUQizBvQjKS4hBLSa0WS/view?usp=sharing",
@@ -47,70 +33,35 @@
             }
         ];
 
-        // Update diagnostic UI helper
-        function updateStatus(message, isError = false) {
-            const statusBox = document.getElementById('system-status');
-            statusBox.innerText = `Log: ${message}`;
-            if (isError) {
-                statusBox.style.borderLeftColor = '#ff4a4a';
-                statusBox.style.color = '#ff9999';
-            } else {
-                statusBox.style.borderLeftColor = '#00ffcc';
-                statusBox.style.color = '#f0f0f0';
-            }
-        }
-
-        // ==========================================
-        // 2. DATA PROCESSING LAYER (FIXED RE-WRITE)
-        // ==========================================
-        function convertDriveLinkToImage(rawUrl) {
-            if (!rawUrl) return '';
-            
-            // Regex captures the alphanumeric ID block between /d/ and /view
-            const driveIdRegex = /\/d\/([a-zA-Z0-9-_]+)/;
-            const match = rawUrl.match(driveIdRegex);
-            
-            if (match && match[1]) {
-                const fileId = match[1]; // FIXED: Extracting the actual ID string instead of the match array
-                // Pulls the image cleanly using Google's thumbnail engine
-                return `https://google.com{fileId}&sz=w1000`;
-            }
-            
-            return rawUrl;
-        }
-
-        // ==========================================
-        // 3. INTERFACE VIEW RENDERING LAYER
-        // ==========================================
         function renderUserInterface(items) {
             const container = document.getElementById('gallery-container');
             container.innerHTML = ''; 
-            
-            let validFramesCount = 0;
 
             items.forEach(item => {
-                if (!item.ImageURL) return; 
-
-                validFramesCount++;
-                const directImgSrc = convertDriveLinkToImage(item.ImageURL);
+                // EXPLANATION: To make your raw links render as an actual image, 
+                // swap out the variable below from 'item.ImageURL' to 'convertLink(item.ImageURL)'
+                const finalImgSrc = item.ImageURL; 
 
                 const card = document.createElement('div');
                 card.className = 'gallery-card';
                 card.innerHTML = `
-                    <img src="${directImgSrc}" alt="${item.Title}" loading="lazy">
+                    <img src="${finalImgSrc}" alt="${item.Title}">
                     <div class="gallery-info">
                         <h3>${item.Title}</h3>
                         <p>${item.Caption}</p>
-                        <small>Captured: ${item.Date}</small>
+                        <small>${item.Date}</small>
                     </div>
                 `;
                 container.appendChild(card);
             });
-
-            updateStatus(`Success. Fully loaded ${validFramesCount} local data frames onto canvas view layer.`);
         }
 
-        // Fire up data acquisition engine on page initialization instantly
+        // Quick conversion block to change web previews into graphics streams
+        function convertLink(url) {
+            const id = url.split('/d/')[1].split('/')[0];
+            return `https://google.com{id}`;
+        }
+
         renderUserInterface(STATIC_PHOTOS);
     </script>
 </body>
