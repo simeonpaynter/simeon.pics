@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simeon.pics | Hard-Coded Local Engine</title>
+    <title>Simeon.pics | Production Hard-Coded Engine</title>
     <style>
         body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #f0f0f0; }
         .status-box { background: #2a2a2a; border-left: 4px solid #00ffcc; padding: 15px; margin-bottom: 20px; font-size: 0.9rem; }
@@ -35,14 +35,14 @@
                 PhotoID: "1",
                 Title: "a mom and her fawn",
                 Caption: "sunrise with deer",
-                ImageURL: "https://drive.google.com/file/d/1oYXTGryFK6UG5JhkHUfT83d9yPzS4dW7/view?usp=sharing",
+                ImageURL: "https://google.com",
                 Date: "2026-05-15"
             },
             {
                 PhotoID: "2",
                 Title: "fun times",
                 Caption: "friday night in the cities",
-                ImageURL: "https://drive.google.com/file/d/1ClQvQpnqFn9IjUQizBvQjKS4hBLSa0WS/view?usp=sharing",
+                ImageURL: "https://google.com",
                 Date: "2024-04-23"
             }
         ];
@@ -61,15 +61,22 @@
         }
 
         // ==========================================
-        // 2. DATA PROCESSING LAYER
+        // 2. FIXED DATA PROCESSING LAYER (THUMBNAIL ENGINE BYPASS)
         // ==========================================
-        
-        // Converts user-pasted Google Drive share links into direct image endpoints
         function convertDriveLinkToImage(rawUrl) {
             if (!rawUrl) return '';
+            
+            // Regex parsing pattern to harvest the alphanumeric file ID token
             const driveIdRegex = /\/d\/([a-zA-Z0-9-_]+)/;
             const match = rawUrl.match(driveIdRegex);
-            return match ? `https://googleusercontent.com{match[1]}` : rawUrl;
+            
+            if (match && match[1]) {
+                const fileId = match[1];
+                // Bypasses web-view permissions and requests raw file binaries at a crisp 1000px resolution width
+                return `https://google.com{fileId}&sz=w1000`;
+            }
+            
+            return rawUrl;
         }
 
         // ==========================================
@@ -100,7 +107,7 @@
                 container.appendChild(card);
             });
 
-            updateStatus(`Success. Fully loaded ${validFramesCount} local data frames into canvas view layer.`);
+            updateStatus(`Success. Fully loaded ${validFramesCount} local data frames onto canvas view layer.`);
         }
 
         // Fire up data acquisition engine on page initialization instantly
