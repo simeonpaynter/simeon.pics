@@ -3,65 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simeon.pics | Raw Link Test</title>
+    <title>Simeon.pics | Secure Embed Gallery</title>
     <style>
         body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #f0f0f0; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .gallery-card { background: #222; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
-        .gallery-card img { width: 100%; height: 240px; object-fit: cover; display: block; background: #333; }
-        .gallery-info { padding: 15px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; margin-top: 20px; }
+        .gallery-card { background: #222; border: 1px solid #333; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        
+        /* Fixed sizing layout to hold Google's sandboxed preview window */
+        .frame-wrapper { width: 100%; height: 260px; background: #000; overflow: hidden; position: relative; }
+        .frame-wrapper iframe { width: 100%; height: 100%; border: 0; display: block; }
+        
+        .gallery-info { padding: 15px; background: #222; }
+        .gallery-info h3 { margin: 0 0 5px 0; color: #fff; font-size: 1.1rem; }
+        .gallery-info p { margin: 0 0 10px 0; color: #aaa; font-size: 0.85rem; }
+        .gallery-info small { color: #00ffcc; font-size: 0.75rem; display: block; }
     </style>
 </head>
 <body>
 
     <h1>📷 Simeon.pics Portfolio</h1>
+    <p>Secure Interface Sandbox Pipeline - Direct Embed</p>
+    
     <div id="gallery-container" class="gallery-grid"></div>
 
     <script>
+        // ==========================================
+        // 1. DATA MATRIX WITH YOUR RAW DRIVE LINKS
+        // ==========================================
         const STATIC_PHOTOS = [
             {
+                PhotoID: "1",
                 Title: "a mom and her fawn",
                 Caption: "sunrise with deer",
                 ImageURL: "https://drive.google.com/file/d/1oYXTGryFK6UG5JhkHUfT83d9yPzS4dW7/view?usp=sharing",
                 Date: "2026-05-15"
             },
             {
+                PhotoID: "2",
                 Title: "fun times",
                 Caption: "friday night in the cities",
-                ImageURL: "https://drive.google.com/file/d/1ClQvQpnqFn9IjUQizBvQjKS4hBLSa0WS/view?usp=sharing",
+                ImageURL: "https://google.com",
                 Date: "2024-04-23"
             }
         ];
 
+        // ==========================================
+        // 2. EMBED COMPLIANT LAYOUT FORMATTER
+        // ==========================================
+        function convertToEmbedFrame(rawUrl) {
+            if (!rawUrl) return '';
+            
+            // Extracts the raw alphanumeric ID segment
+            const driveIdRegex = /\/d\/([a-zA-Z0-9-_]+)/;
+            const match = rawUrl.match(driveIdRegex);
+            
+            if (match && match[1]) {
+                const fileId = match[1];
+                // Switches page target to Google's official website integration endpoint
+                return `https://google.com{fileId}/preview`;
+            }
+            return rawUrl;
+        }
+
+        // ==========================================
+        // 3. INTERFACE RENDERING ENGINE
+        // ==========================================
         function renderUserInterface(items) {
             const container = document.getElementById('gallery-container');
             container.innerHTML = ''; 
 
             items.forEach(item => {
-                // EXPLANATION: To make your raw links render as an actual image, 
-                // swap out the variable below from 'item.ImageURL' to 'convertLink(item.ImageURL)'
-                const finalImgSrc = item.ImageURL; 
+                // Converts link dynamically to bypass cross-origin browser security rules
+                const embedUrl = convertToEmbedFrame(item.ImageURL);
 
                 const card = document.createElement('div');
                 card.className = 'gallery-card';
                 card.innerHTML = `
-                    <img src="${finalImgSrc}" alt="${item.Title}">
+                    <div class="frame-wrapper">
+                        <!-- Swapped <img> tag out for an <iframe> wrapper to obey Google security structures -->
+                        <iframe src="${embedUrl}" allow="autoplay" loading="lazy"></iframe>
+                    </div>
                     <div class="gallery-info">
                         <h3>${item.Title}</h3>
                         <p>${item.Caption}</p>
-                        <small>${item.Date}</small>
+                        <small>Logged: ${item.Date}</small>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Quick conversion block to change web previews into graphics streams
-        function convertLink(url) {
-            const id = url.split('/d/')[1].split('/')[0];
-            return `https://google.com{id}`;
-        }
-
+        // Fire initialization loop
         renderUserInterface(STATIC_PHOTOS);
     </script>
 </body>
