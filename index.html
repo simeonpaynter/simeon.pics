@@ -32,7 +32,7 @@
         const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
         const TAB_NAME = 'PhotoGallery';
         
-        // This is the clean, uncontradicted path using standard JavaScript string templates
+        // This is the raw target url string built correctly using template literals
         const CSV_URL = `https://google.com{SHEET_ID}/export?format=csv&sheet=${TAB_NAME}`;
 
         // Update diagnostic UI text block helper
@@ -42,6 +42,9 @@
             if (isError) {
                 statusBox.style.borderLeftColor = '#ff4a4a';
                 statusBox.style.color = '#ff9999';
+            } else {
+                statusBox.style.borderLeftColor = '#00ffcc';
+                statusBox.style.color = '#f0f0f0';
             }
         }
 
@@ -57,20 +60,14 @@
             return match ? `https://googleusercontent.com{match[1]}` : rawUrl;
         }
 
-        // Clean, easily debugged text splitter function
+        // Clean text splitter function
         function parseSimpleCSV(rawText) {
-            // Step A: Break string down into individual text rows
             const lines = rawText.split('\n');
-            
-            // Step B: Grab headers from row 0 and clean up quote marks
             const headers = lines[0].split(',').map(h => h.replace(/["\r]/g, '').trim());
             console.log("Parsed System Headers:", headers);
 
-            // Step C: Map trailing data rows directly to headers
-            return lines.slice(1).map((line, rowIndex) => {
+            return lines.slice(1).map((line) => {
                 const cells = line.split(',').map(c => c.replace(/["\r]/g, '').trim());
-                
-                // Construct JavaScript Object array
                 let rowObject = {};
                 headers.forEach((header, index) => {
                     rowObject[header] = cells[index] || '';
@@ -80,27 +77,37 @@
         }
 
         // ==========================================
-        // 3. NETWORK EXECUTION ENGINE
+        // 3. NETWORK EXECUTION ENGINE (WITH BROWSER BYPASS PROXY)
         // ==========================================
         async function runPipeline() {
             try {
-                updateStatus(`Attempting network link connection: ${CSV_URL}`);
+                updateStatus("Contacting pipeline network security proxy...");
                 
-                const response = await fetch(CSV_URL);
+                // Routes the target url through a proxy wrapper to attach clean CORS permissions
+                const proxyUrl = 'https://allorigins.win';
+                const targetUrl = encodeURIComponent(CSV_URL);
+                
+                const response = await fetch(`${proxyUrl}${targetUrl}`);
                 
                 if (!response.ok) {
-                    throw new Error(`Google Cloud Rejected Request (Status ${response.status})`);
+                    throw new Error(`Proxy Connection Denied (Status ${response.status})`);
                 }
 
-                const rawText = await response.text();
-                updateStatus("Data packet pulled. Processing layout streams...");
+                const dataWrapper = await response.json();
+                const rawText = dataWrapper.contents; 
+                
+                if (!rawText) {
+                    throw new Error("Empty data packet returned from server extraction stream.");
+                }
+
+                updateStatus("Data packet pulled successfully. Processing layout streams...");
 
                 const dataRows = parseSimpleCSV(rawText);
                 renderUserInterface(dataRows);
 
             } catch (error) {
                 console.error("Execution Interrupted:", error);
-                updateStatus(`${error.message} - Double check file share permissions or URL formatting tokens.`, true);
+                updateStatus(`System Error: ${error.message}`, true);
             }
         }
 
@@ -132,7 +139,11 @@
                 container.appendChild(card);
             });
 
-            updateStatus(`Success. Fully loaded ${validFramesCount} pipeline display frames onto canvas layer.`);
+            if(validFramesCount === 0) {
+                updateStatus("Data connected, but zero images were rendered. Check that your spreadsheet contains an 'ImageURL' header.", true);
+            } else {
+                updateStatus(`Success. Fully loaded ${validFramesCount} pipeline display frames onto canvas layer.`);
+            }
         }
 
         // Fire up data acquisition engine on page initialization
