@@ -27,8 +27,9 @@
     const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
     const TAB_NAME = 'PhotoGallery';
 
-    // FIX: Added the correct Google path and the missing '$' before {SHEET_ID}
-    const CSV_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${TAB_NAME}`;
+// NEW STABLE ENDPOINT FORMAT
+const CSV_URL = `https://google.com{SHEET_ID}/export?format=csv&sheet=${TAB_NAME}`;
+
 
 
         // Helper function to extract Google Drive ID and return clean CDN hotlink
