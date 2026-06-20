@@ -148,7 +148,8 @@
             const feedContainer = document.getElementById("photo-feed");
 
             function formatDisplayDate(dateString) {
-                const options = { year: 'numeric', month: 'LONG', day: 'numeric' };
+                // FIX: Option values must be completely lowercase 'long' to prevent engine crash
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
                 const date = new Date(dateString + 'T00:00:00');
                 return date.toLocaleDateString('en-US', options);
             }
@@ -176,7 +177,7 @@
                     if (!response.ok) {
                         throw new Error(`HTTP Status ${response.status} - ${response.statusText}. The browser could not fetch 'photos_config.json'.`);
                     }
-                    return response.text(); // Read text first to catch structural JSON parsing bugs cleanly
+                    return response.text(); 
                 })
                 .then(textData => {
                     try {
@@ -226,7 +227,7 @@
                     } else if (error.message.includes("HTTP Status")) {
                         renderHealthMonitor("The server rejected the file request or the file name does not match.", error.message);
                     } else {
-                        renderHealthMonitor("Network level connectivity issue or local file scheme restriction.", error.message);
+                        renderHealthMonitor("Network level connectivity issue or runtime code restriction.", error.message);
                     }
                 });
         });
