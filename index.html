@@ -3,55 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simeon's Photo Feed</title>
+    <title>Simeon.pics | Smart Drive Link Gallery POC</title>
     <style>
-        body { 
-            font-family: sans-serif; 
-            background: #121212; 
-            color: #ffffff; 
-            text-align: center; 
-            padding: 50px 20px; 
-        }
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto; 
-            background: #1e1e1e; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        h1 { color: #ff5722; margin-bottom: 10px; }
-        p { color: #aaa; font-size: 1.1rem; }
-        img { 
-            width: 100%; 
-            max-width: 400px; 
-            border-radius: 8px; 
-            margin: 20px 0; 
-            border: 2px solid #333;
-        }
-        .status-badge {
-            background: #2e7d32;
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: inline-block;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #111; color: #eee; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .gallery-card { background: #222; border: 1px solid #333; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .gallery-card img { width: 100%; height: 240px; object-fit: cover; display: block; background: #333; }
+        .gallery-info { padding: 15px; }
+        .gallery-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; color: #fff; }
+        .gallery-info p { margin: 0; font-size: 0.9rem; color: #aaa; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="status-badge">✓ Connection Successful</div>
-        <h1>simeon.pics is Live!</h1>
-        <p>This template confirms your Porkbun domain is successfully hosting from GitHub Pages.</p>
-        
-        <!-- Placeholder image to test layout -->
-        <img src="https://unsplash.com" alt="Test Landscape">
-        
-        <p style="font-size: 0.9rem; margin-top: 20px;">Next up: Swapping this out for your custom taggable grid!</p>
-    </div>
+    <h1>📷 Simeon.pics</h1>
+    <p>Asset Stream - Parsing Raw Google Drive Share Links Automatically</p>
 
+    <div id="gallery-container" class="gallery-grid">Loading visualization frames...</div>
+
+    <script>
+        // CONFIG: Replace with your actual Google Sheet ID
+        const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
+        const TAB_NAME = 'PhotoGallery';
+        const CSV_URL = `https://google.com{SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${TAB_NAME}`;
+
+        // Helper function to extract Google Drive ID and return clean CDN hotlink
+        function convertDriveLinkToImage(rawUrl) {
+            if (!rawUrl) return '';
+            
+            // Regex to find the 33-character alphanumeric file ID between '/d/' and the next '/'
+            const driveIdRegex = /\/d\/([a-zA-Z0-9-_]+)/;
+            const match = rawUrl.match(driveIdRegex);
+            
+            if (match && match[1]) {
+                const fileId = match[1];
+                // Returns the permanent direct content delivery endpoint
+                return `https://googleusercontent.com{fileId}`;
+            }
+            
+            // Fallback if the URL pasted doesn't match a standard drive link
+            return rawUrl;
+        }
+
+        function parseCSV(text) {
+            let lines = text.split('\n');
+            let headers = lines[0].split(',').map(h => h.replace(/["\r]/g, ''));
+            return lines.slice(1).map(line => {
+                let data = line.split(',').map(cell => cell.replace(/["\r]/g, ''));
+                return headers.reduce((obj, nextKey, index) => {
+                    obj[nextKey] = data[index];
+                    return obj;
+                }, {});
+            });
+        }
+
+        async function fetchGallery() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                const photos = parseCSV(csvText);
+                renderGallery(photos);
+            } catch (error) {
+                document.getElementById('gallery-container').innerText = 'Failed to download asset streams.';
+                console.error(error);
+            }
+        }
+
+        function renderGallery(photos) {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+
+            photos.forEach(photo => {
+                if(!photo.ImageURL) return; // Skip empty rows
+
+                // Convert the user-pasted share link into a workable image tag source
+                const directImageUrl = convertDriveLinkToImage(photo.ImageURL);
+
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+
+                card.innerHTML = `
+                    <img src="${directImageUrl}" alt="${photo.Title || 'Gallery Image'}" loading="lazy">
+                    <div class="gallery-info">
+                        <h3>${photo.Title || 'Untitled File'}</h3>
+                        <p>${photo.Caption || ''}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Initialize execution loop
+        fetchGallery();
+    </script>
 </body>
 </html>
