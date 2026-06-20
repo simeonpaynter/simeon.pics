@@ -11,6 +11,9 @@
             --border-color: #dbdbdb;
             --text-color: #262626;
             --text-muted: #8e8e8e;
+            --error-bg: #fff5f5;
+            --error-border: #feb2b2;
+            --error-text: #c53030;
         }
 
         body {
@@ -71,7 +74,6 @@
             background-color: #f0f0f0;
         }
 
-        /* Fallback uniform display while honoring ratio box styles */
         .image-wrapper img {
             width: 100%;
             height: 100%;
@@ -96,10 +98,38 @@
             letter-spacing: 0.2px;
         }
 
-        .error-message {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
+        /* Health Monitor Styling */
+        .health-monitor {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 20px;
+            color: var(--error-text);
+        }
+
+        .health-monitor h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .health-monitor code {
+            display: block;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        .health-checklist {
+            margin: 15px 0 0 0;
+            padding-left: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -110,65 +140,94 @@
     </header>
 
     <main class="feed-container" id="photo-feed">
-        <!-- Live content is populated dynamically here -->
+        <!-- Feed content or Health Diagnostics will load here -->
     </main>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const feedContainer = document.getElementById("photo-feed");
 
-            // Format calendar strings into cleaner viewing layouts
             function formatDisplayDate(dateString) {
                 const options = { year: 'numeric', month: 'LONG', day: 'numeric' };
                 const date = new Date(dateString + 'T00:00:00');
                 return date.toLocaleDateString('en-US', options);
             }
 
+            function renderHealthMonitor(errorContext, systemMessage) {
+                feedContainer.innerHTML = `
+                    <div class="health-monitor">
+                        <h2>⚠️ System Health Monitor: Load Failure</h2>
+                        <p><strong>Context:</strong> ${errorContext}</p>
+                        <p><strong>Technical Error Details:</strong></p>
+                        <code>${systemMessage}</code>
+                        <p><strong>Troubleshooting Checklist:</strong></p>
+                        <ul class="health-checklist">
+                            <li>Verify <code>photos_config.json</code> exists in the exact same directory folder as <code>index.html</code>.</li>
+                            <li>Open your JSON file and check for syntax typos (like a missing comma between posts, or a trailing comma at the end of the last item).</li>
+                            <li>If running locally on your computer, ensure you are running a local development server (like VS Code Live Server) rather than opening the HTML file directly via <code>file://</code>.</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
             // Fetch structural headless content JSON layout
             fetch("photos_config.json")
                 .then(response => {
-                    if (!response.ok) throw new Error("Network issue reading photos_config.json");
-                    return response.json();
-                })
-                .then(photos => {
-                    if (photos.length === 0) {
-                        feedContainer.innerHTML = '<div class="error-message">No photos published yet.</div>';
-                        return;
+                    if (!response.ok) {
+                        throw new Error(`HTTP Status ${response.status} - ${response.statusText}. The browser could not fetch 'photos_config.json'.`);
                     }
+                    return response.text(); // Read text first to catch structural JSON parsing bugs cleanly
+                })
+                .then(textData => {
+                    try {
+                        const photos = JSON.parse(textData);
+                        
+                        if (photos.length === 0) {
+                            feedContainer.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">No photos published yet.</div>';
+                            return;
+                        }
 
-                    // Loop over entries to generate clean visual layout blocks
-                    photos.forEach(photo => {
-                        const postElement = document.createElement("article");
-                        postElement.className = "post-card";
+                        // Loop over entries to generate clean visual layout blocks
+                        photos.forEach(photo => {
+                            const postElement = document.createElement("article");
+                            postElement.className = "post-card";
 
-                        // Handle aspect configurations elegantly via CSS calculations
-                        let paddingBottom = "100%"; // default 1:1 square
-                        if (photo.aspect_ratio === "4:5") paddingBottom = "125%";
-                        if (photo.aspect_ratio === "16:9") paddingBottom = "56.25%";
+                            let paddingBottom = "100%"; // default 1:1 square
+                            if (photo.aspect_ratio === "4:5") paddingBottom = "125%";
+                            if (photo.aspect_ratio === "16:9") paddingBottom = "56.25%";
 
-                        let locationHTML = photo.location ? `<span class="post-location">${photo.location}</span>` : '';
+                            let locationHTML = photo.location ? `<span class="post-location">${photo.location}</span>` : '';
 
-                        postElement.innerHTML = `
-                            <div class="post-header">
-                                ${locationHTML}
-                            </div>
-                            <div class="image-wrapper" style="padding-bottom: ${paddingBottom}; height: 0;">
-                                <img src="${photo.image_path}" 
-                                     alt="${photo.alt_text}" 
-                                     loading="lazy" 
-                                     style="position: absolute; top: 0; left: 0;">
-                            </div>
-                            <div class="post-body">
-                                <p class="post-caption">${photo.caption}</p>
-                                <div class="post-date">${formatDisplayDate(photo.date_published)}</div>
-                            </div>
-                        `;
-                        feedContainer.appendChild(postElement);
-                    });
+                            postElement.innerHTML = `
+                                <div class="post-header">
+                                    ${locationHTML}
+                                </div>
+                                <div class="image-wrapper" style="padding-bottom: ${paddingBottom}; height: 0;">
+                                    <img src="${photo.image_path}" 
+                                         alt="${photo.alt_text}" 
+                                         loading="lazy" 
+                                         style="position: absolute; top: 0; left: 0;">
+                                </div>
+                                <div class="post-body">
+                                    <p class="post-caption">${photo.caption}</p>
+                                    <div class="post-date">${formatDisplayDate(photo.date_published)}</div>
+                                </div>
+                            `;
+                            feedContainer.appendChild(postElement);
+                        });
+                    } catch (jsonError) {
+                        throw new Error(`JSON Syntax Validation Failed. Details: ${jsonError.message}`);
+                    }
                 })
                 .catch(error => {
-                    console.error("Error loading image configuration layer:", error);
-                    feedContainer.innerHTML = '<div class="error-message">Unable to load feed content at this time.</div>';
+                    console.error("Diagnostic Layer Traced Error:", error);
+                    if (error.message.includes("JSON Syntax")) {
+                        renderHealthMonitor("Your 'photos_config.json' file contains formatting errors.", error.message);
+                    } else if (error.message.includes("HTTP Status")) {
+                        renderHealthMonitor("The server rejected the file request or the file name does not match.", error.message);
+                    } else {
+                        renderHealthMonitor("Network level connectivity issue or local file scheme restriction.", error.message);
+                    }
                 });
         });
     </script>
