@@ -23,11 +23,13 @@
 
     <script>
 
-        // CONFIG: Replace with your actual Google Sheet ID
-    const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
-    const TAB_NAME = 'PhotoGallery';
+// CONFIG: Your exact live Google Sheet token
+const SHEET_ID = '18TPquPHybZZm4PqsRZh6vSnqfZ-C9luC7Grt0SVGoJg'; 
 
-// NEW STABLE ENDPOINT FORMAT
+// TAB NAME: Pointing to your image gallery matrix tab
+const TAB_NAME = 'PhotoGallery';
+
+// COMPUTED ENDPOINT: Perfectly structured string with backticks and variable insertion
 const CSV_URL = `https://google.com{SHEET_ID}/export?format=csv&sheet=${TAB_NAME}`;
 
 
