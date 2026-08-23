@@ -1,2 +1,2 @@
-# simeon.pics
-Front end code for personal website to make personal images public
+# Simeon.pics
+Photo gallery from Simeon Paynter.
